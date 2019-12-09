@@ -11,10 +11,10 @@ fun main() {
         2 to { a, b -> a * b }
     )
 
-    fun getTerm(mode: Int, intCode: List<Int>, index: Int): Int =
+    fun getIndex(mode: Int, intCode: List<Int>, index: Int): Int =
         when (mode) {
-            0 -> intCode[intCode[index]]
-            1 -> intCode[index]
+            0 -> intCode[index]
+            1 -> index
             else -> error("invalid mode: $mode")
         }
 
@@ -31,6 +31,7 @@ fun main() {
         val opCode = paddedCode.drop(3).toInt()
         val parameter1Mode = parseInt(paddedCode[2] + "")
         val parameter2Mode = parseInt(paddedCode[1] + "")
+        val parameter3Mode = parseInt(paddedCode[0] + "")
 
         fun hasChanged(instruction: Int, newInstraction: Int): Boolean {
             return instruction != newInstraction
@@ -40,7 +41,7 @@ fun main() {
             return null
         }
 
-        val term1 = getTerm(parameter1Mode, intCode, index + 1)
+        val param1Index = getIndex(parameter1Mode, intCode, index + 1)
 
         return when (opCode) {
             0 -> {
@@ -48,9 +49,9 @@ fun main() {
                 execute(tmp, input, output, index + 2)
             }
             1, 2 -> {
-                val term2 = getTerm(parameter2Mode, intCode, index + 2)
-                val term3 = getTerm(1, intCode, index + 3)
-                tmp[term3] = operations[opCode]!!.invoke(term1, term2)
+                val param2Index = getIndex(parameter2Mode, intCode, index + 2)
+                val param3Index = getIndex(parameter3Mode, intCode, index + 3)
+                tmp[param3Index] = operations[opCode]!!.invoke(intCode[param1Index], intCode[param2Index])
                 if (hasChanged(intCode[index], tmp[index])) {
                     execute(tmp, input, output, index)
                 } else {
@@ -58,27 +59,27 @@ fun main() {
                 }
             }
             3 -> {
-                tmp[intCode[index + 1]] = input.take()
+                tmp[param1Index] = input.take()
                 execute(tmp, input, output, index + 2)
             }
             4 -> {
-                output.put(term1)
+                output.put(intCode[param1Index])
                 execute(tmp, input, output, index + 2)
             }
             5, 6 -> {
-                val term2 = getTerm(parameter2Mode, intCode, index + 2)
+                val param2Index = getIndex(parameter2Mode, intCode, index + 2)
                 when {
-                    opCode == 5 && term1 != 0 -> execute(tmp, input, output, term2)
-                    opCode == 6 && term1 == 0 -> execute(tmp, input, output, term2)
+                    opCode == 5 && intCode[param1Index] != 0 -> execute(tmp, input, output, intCode[param2Index])
+                    opCode == 6 && intCode[param1Index] == 0 -> execute(tmp, input, output, intCode[param2Index])
                     else -> execute(tmp, input, output, index + 3)
                 }
             }
             7, 8 -> {
-                val term2 = getTerm(parameter2Mode, intCode, index + 2)
-                val term3 = getTerm(1, intCode, index + 3)
+                val term2 = intCode[getIndex(parameter2Mode, intCode, index + 2)]
+                val term3 = intCode[getIndex(1, intCode, index + 3)]
                 tmp[term3] = when (opCode) {
-                    7 -> if (term1 < term2) 1 else 0
-                    8 -> if (term1 == term2) 1 else 0
+                    7 -> if (intCode[param1Index] < term2) 1 else 0
+                    8 -> if (intCode[param1Index] == term2) 1 else 0
                     else -> error("impossibru")
                 }
                 if (hasChanged(intCode[index], tmp[index])) {
