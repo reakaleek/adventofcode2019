@@ -1,8 +1,7 @@
 package adventofcode
 
-
 fun main() {
-    // val matrix = getResourceLines("day_10_1.in").map { it.map { c -> if (c == '#') 1 else 0}}
+    //val matrix = getResourceLines("day_10_1.in").map { it.map { c -> if (c == '#') 1 else 0}}
 
     val matrix: List<List<Int>> = listOf(
         listOf(0, 1, 0, 0, 1),
@@ -13,8 +12,6 @@ fun main() {
     )
 
     class Point(val x: Int, val y: Int) {
-
-
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
@@ -43,12 +40,11 @@ fun main() {
     }
 
     fun countPointsInSight(currentPoint: Point, otherPoints: List<Point>): Int =
-        otherPoints.fold(emptySet<Pair<Int,Int>>()) { acc, p ->
+        otherPoints.fold(emptySet<Pair<Int, Int>>()) { acc, p ->
             val dx = p.x - currentPoint.x
             val dy = p.y - currentPoint.y
             val ggt: Int by lazy { dx.toBigInteger().gcd(dy.toBigInteger()).toInt() }
-            if (dx != 0 || dy != 0) acc.plus(Pair(dy / ggt, dx / ggt))
-            else acc
+            acc.plus(Pair(dy / ggt, dx / ggt))
         }.size
 
     points.map { point ->
